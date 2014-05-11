@@ -98,7 +98,8 @@ function mashUpVideos(data, callback) {
   var args = [
     '-f', 'concat',
     '-i', data.path + '/' + videoListSuffix,
-    '-c', 'copy',
+    '-f', 'mov',
+    '-strict', '-2',
     data.path + '/' + mashUpSuffix
   ];
   spawn(prog, args, { stdio: 'ignore' })
