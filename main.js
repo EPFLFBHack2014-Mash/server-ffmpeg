@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 
 'use strict';
 
@@ -7,7 +6,6 @@ var tmp = require("tmp");
 var fs = require("fs");
 var spawn = require('child_process').spawn;
 var Kaiseki = require('kaiseki');
-var moment = require('moment');
 
 var contentType = {"Content-Type": "application/json"};
 var videoListSuffix = "videos";
@@ -18,22 +16,20 @@ var PARSE_APP_ID = 'Cflndkv2V6uHwgdVQA5a8SpauDMvxoIk96aRgqKE';
 var PARSE_REST_API_KEY = 'zXv53x8AoJjhtmRe2L9qt6bRPsR2WcGG5kLc4qnw';
 var kaiseki = new Kaiseki(PARSE_APP_ID, PARSE_REST_API_KEY);
 
-/**
- * Request-handler
- */
-http.createServer(function (request, response) {
+var express = require('express'),
+    app = express();
 
-  console.log('[%s] %s %s', moment().format(), request.method, request.url);
+var logger = require('morgan');
+var bodyParser = require('body-parser');
+var methodOverride = require('method-override');
 
-  // Request received
-  if (request.method === "POST") {
-    response.writeHead(200, "OK", contentType);
-    response.end('Ok', 'utf8');
-  }
-  else {
-    response.writeHead(405, "Method not allowed", contentType);
-    response.end('Method not allowed', 'utf8');
-  }
+app.use(logger());
+app.use(bodyParser());
+app.use(methodOverride());
+app.use(app.router);
+
+app.post('/', function(req, res) {
+  res.json({success: true});
 
   // Create unique temp dir for this request
   tmp.dir(function (err, path) {
@@ -41,43 +37,83 @@ http.createServer(function (request, response) {
       throw err;
     }
 
-    // Handle request
-    readVideosIDs(request, response, function (data) {
-      data.path = path;
-      console.log('data', data);
-      downloadVideos(data, function () {
-        mashUpVideos(data, function () {
-          uploadMashUp(data);
-        });
-      });
+  var data = req.body;
+
+  console.log(data);
+
+  data.path = path;
+  console.log('data', data);
+  downloadVideos(data, function () {
+    mashUpVideos(data, function () {
+      uploadMashUp(data);
     });
   });
 
-}).listen(6862);
+});
+
+app.listen(6862);
+console.log("Listening on http://mash.romac.me:6862");
+
+/**
+ * Request-handler
+ */
+// http.createServer(function (request, response) {
+
+//   console.log('[%s] %s %s', moment().format(), request.method, request.url);
+
+//   // Request received
+//   if (request.method === "POST") {
+//     response.writeHead(200, "OK", contentType);
+//     response.end('Ok', 'utf8');
+//   }
+//   else {
+//     response.writeHead(405, "Method not allowed", contentType);
+//     response.end('Method not allowed', 'utf8');
+//   }
+
+//   // Create unique temp dir for this request
+//   tmp.dir(function (err, path) {
+//     if (err) {
+//       throw err;
+//     }
+
+//     // Handle request
+//     readVideosIDs(request, response, function (data) {
+//       data.path = path;
+//       console.log('data', data);
+//       downloadVideos(data, function () {
+//         mashUpVideos(data, function () {
+//           uploadMashUp(data);
+//         });
+//       });
+//     });
+//   });
+
+// }).listen(6862);
 
 console.log("Listening on http://mash.romac.me:6862");
 
 /**
  * Read videos IDs from the POST-data from request and handle related errors
  */
-function readVideosIDs(request, response, callback) {
-  var maxSize = Math.pow(2, 20);
-  var data = "";
-
-  // Read as much data as possible and concat
-  request.on("data", function (partialData) {
-    data += partialData;
-    if (data.length > maxSize) {
-      data = "";
-      request.connection.destroy();
-    }
-  });
-
-  // Once all data is read, give to callback
-  request.on("end", function () {
-    callback(JSON.parse(data));
-  });
-}
+// function readVideosIDs(request, response, callback) {
+//   var maxSize = Math.pow(2, 20);
+//   var data = "";
+//
+//   // Read as much data as possible and concat
+//   request.on("data", function (partialData) {
+//     data += partialData;
+//     if (data.length > maxSize) {
+//       data = "";
+//       request.connection.destroy();
+//     }
+//   });
+//
+//   // Once all data is read, give to callback
+//   request.on("end", function () {
+//     callback(JSON.parse(data));
+//   });
+// }
 
 
 /**
@@ -87,7 +123,7 @@ function downloadVideos(data, callback) {
   var downloaded = [];
 
   // Shuffle the videos, we don't want to always have the same machup
-  data.videos = suffle(data.videos);
+  data.videos = shuffle(data.videos);
 
   data.videos.each(function (video) {
     var videoLocalFile = data.path + "/" + video.objectId;
