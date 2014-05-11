@@ -44,6 +44,7 @@ http.createServer(function (request, response) {
     // Handle request
     readVideosIDs(request, response, function (data) {
       data.path = path;
+      console.log('data', data);
       downloadVideos(data, function () {
         mashUpVideos(data, function () {
           uploadMashUp(data);
@@ -105,6 +106,7 @@ function downloadVideos(data, callback) {
 
       // Callback after the last download
       downloaded.push(video.objectId);
+      console.log(downloaded.length, data.videos.length);
       if (downloaded.length === data.videos.length) {
         callback();
       }
@@ -150,8 +152,10 @@ function uploadMashUp(data) {
           __type: 'File'
         }
       };
+      console.log(mashUp);
       kaiseki.createObject("Mashup", mashUp,
         function(err, res, body, success) {
+          console.log('create file', arguments);
           if (err) {
             throw err;
           }
