@@ -1,4 +1,4 @@
-
+#!/usr/bin/env node
 'use strict';
 
 var http = require('http');
@@ -100,16 +100,26 @@ function mashUpVideos(data, callback) {
     '-i', data.path + '/' + videoListSuffix,
     '-f', 'mov',
     '-strict', '-2',
+    '-vf', 'transpose=1',
     data.path + '/' + mashUpSuffix
   ];
-  spawn(prog, args, { stdio: 'ignore' })
-    .on('close', function (code) {
-      if (code !== 0) {
+console.log([prog].concat(args).join(' '));
+  var proc = spawn(prog, args);
+  proc.on('close', function (code) {
+      if (code === 0) {
         callback();
       }
     });
-}
 
+  proc.stdout.on('data', function (data) {
+    console.log('' + data);
+  });
+
+  proc.stderr.on('data', function (data) {
+    console.log('grep stderr: ' + data);
+  });
+
+}
 
 /**
  * Upload mashup
@@ -119,19 +129,21 @@ function uploadMashUp(data) {
   // Upload mashup to Parse.com
   kaiseki.uploadFile(data.path + '/' + mashUpSuffix,
     function(err, res, body, success) {
-
+      
       // Give mashup url to Parse.com
       var mashUp = {
-        group: data.group.objectId,
+        group: {
+          objectId: data.group.objectId,
+          __type: 'Pointer',
+          className: 'Group'
+        },
         file: {
           name: body.name,
           __type: 'File'
         }
       };
-      console.log(mashUp);
       kaiseki.createObject('Mashup', mashUp,
         function(err, res, body, success) {
-          console.log('create file', arguments);
           if (err) {
             throw err;
           }
