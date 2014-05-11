@@ -90,7 +90,7 @@ function downloadVideos(data, callback) {
       });
 
     // Download videos
-    var request = http.get(video.file, function (response) {
+    var request = http.get(video.file.url, function (response) {
       response.pipe(fs.createWriteStream(videoLocalFile));
 
       // Callback after the last download
@@ -135,7 +135,10 @@ function uploadMashUp(data) {
       // Give mashup url to Parse.com
       var mashUp = {
         group: data.group.objectId,
-        file: body.url
+        file: {
+          name: body.name,
+          __type: 'File'
+        }
       };
       kaiseki.createObject("Mashup", mashUp,
         function(err, res, body, success) {
