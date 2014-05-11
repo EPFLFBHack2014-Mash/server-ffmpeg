@@ -7,6 +7,7 @@ var tmp = require("tmp");
 var fs = require("fs");
 var spawn = require('child_process').spawn;
 var Kaiseki = require('kaiseki');
+var moment = require('moment');
 
 var contentType = {"Content-Type": "application/json"};
 var videoListSuffix = "videos";
@@ -21,6 +22,8 @@ var kaiseki = new Kaiseki(PARSE_APP_ID, PARSE_REST_API_KEY);
  * Request-handler
  */
 http.createServer(function (request, response) {
+
+  console.log('[%s] %s %s', moment().format(), request.method, request.url);
 
   // Request received
   if (request.method === "POST") {
