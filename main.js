@@ -37,16 +37,18 @@ app.post('/', function(req, res) {
       throw err;
     }
 
-  var data = req.body;
+    var data = req.body;
 
-  console.log(data);
+    console.log(data);
 
-  data.path = path;
-  console.log('data', data);
-  downloadVideos(data, function () {
-    mashUpVideos(data, function () {
-      uploadMashUp(data);
+    data.path = path;
+    console.log('data', data);
+    downloadVideos(data, function () {
+      mashUpVideos(data, function () {
+        uploadMashUp(data);
+      });
     });
+
   });
 
 });
