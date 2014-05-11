@@ -1,4 +1,4 @@
-#!/usr/env node
+#!/usr/bin/env node
 
 var http = require("http");
 var tmp = require("tmp");
