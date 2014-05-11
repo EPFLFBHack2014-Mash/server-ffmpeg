@@ -68,11 +68,13 @@ function downloadVideos(data, callback) {
 
     // Write file name for ffmpeg later
     fs.appendFile(data.path + '/' + videoListSuffix,
-      'file "' + videoLocalFile + '"', function (err) {
+      'file ' + videoLocalFile + '\n', function (err) {
         if (err) {
           throw err;
         }
       });
+
+    console.log('Downloading %s to %s...', video.file.url, videoLocalFile);
 
     // Download videos
     http.get(video.file.url, function (response) {
