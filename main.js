@@ -26,7 +26,6 @@ var methodOverride = require('method-override');
 app.use(logger());
 app.use(bodyParser());
 app.use(methodOverride());
-app.use(app.router);
 
 app.post('/', function(req, res) {
   res.json({success: true});
@@ -127,7 +126,7 @@ function downloadVideos(data, callback) {
   // Shuffle the videos, we don't want to always have the same machup
   data.videos = shuffle(data.videos);
 
-  data.videos.each(function (video) {
+  data.videos.forEach(function (video) {
     var videoLocalFile = data.path + "/" + video.objectId;
 
     // Write file name for ffmpeg later
@@ -139,7 +138,7 @@ function downloadVideos(data, callback) {
       });
 
     // Download videos
-    var request = http.get(video.file.url, function (response) {
+    http.get(video.file.url, function (response) {
       response.pipe(fs.createWriteStream(videoLocalFile));
 
       // Callback after the last download
