@@ -47,7 +47,7 @@ http.createServer(function (request, response) {
   });
 
 }).listen(6862);
-console.log("Server ready :)");
+
 console.log("Listening on http://mash.romac.me:6862");
 
 /**
