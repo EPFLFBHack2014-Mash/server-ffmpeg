@@ -79,9 +79,13 @@ function readVideosIDs(request, response, callback) {
 function downloadVideos(data, callback) {
   var downloaded = [];
 
+  // Shuffle the videos, we don't want to always have the same machup
+  data.videos = suffle(data.videos);
+
   data.videos.each(function (video) {
     var videoLocalFile = data.path + "/" + video.objectId;
 
+    // Write file name for ffmpeg later
     fs.appendFile(data.path + "/" + videoListSuffix,
       "file '" + videoLocalFile + "'", function (err) {
         if (err) {
