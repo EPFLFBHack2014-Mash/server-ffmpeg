@@ -1,15 +1,14 @@
 
 'use strict';
 
-var http = require("http");
-var tmp = require("tmp");
-var fs = require("fs");
+var http = require('http');
+var tmp = require('tmp');
+var fs = require('fs');
 var spawn = require('child_process').spawn;
 var Kaiseki = require('kaiseki');
 
-var contentType = {"Content-Type": "application/json"};
-var videoListSuffix = "videos";
-var mashUpSuffix = "mashup";
+var videoListSuffix = 'videos';
+var mashUpSuffix = 'mashup.mov';
 
 // Kaiseki instance
 var PARSE_APP_ID = 'Cflndkv2V6uHwgdVQA5a8SpauDMvxoIk96aRgqKE';
@@ -53,69 +52,7 @@ app.post('/', function(req, res) {
 });
 
 app.listen(6862);
-console.log("Listening on http://mash.romac.me:6862");
-
-/**
- * Request-handler
- */
-// http.createServer(function (request, response) {
-
-//   console.log('[%s] %s %s', moment().format(), request.method, request.url);
-
-//   // Request received
-//   if (request.method === "POST") {
-//     response.writeHead(200, "OK", contentType);
-//     response.end('Ok', 'utf8');
-//   }
-//   else {
-//     response.writeHead(405, "Method not allowed", contentType);
-//     response.end('Method not allowed', 'utf8');
-//   }
-
-//   // Create unique temp dir for this request
-//   tmp.dir(function (err, path) {
-//     if (err) {
-//       throw err;
-//     }
-
-//     // Handle request
-//     readVideosIDs(request, response, function (data) {
-//       data.path = path;
-//       console.log('data', data);
-//       downloadVideos(data, function () {
-//         mashUpVideos(data, function () {
-//           uploadMashUp(data);
-//         });
-//       });
-//     });
-//   });
-
-// }).listen(6862);
-
-console.log("Listening on http://mash.romac.me:6862");
-
-/**
- * Read videos IDs from the POST-data from request and handle related errors
- */
-// function readVideosIDs(request, response, callback) {
-//   var maxSize = Math.pow(2, 20);
-//   var data = "";
-//
-//   // Read as much data as possible and concat
-//   request.on("data", function (partialData) {
-//     data += partialData;
-//     if (data.length > maxSize) {
-//       data = "";
-//       request.connection.destroy();
-//     }
-//   });
-//
-//   // Once all data is read, give to callback
-//   request.on("end", function () {
-//     callback(JSON.parse(data));
-//   });
-// }
-
+console.log('Listening on http://mash.romac.me:6862');
 
 /**
  * DOWNLOAD ALL THE THINGS!  \•/
@@ -127,11 +64,11 @@ function downloadVideos(data, callback) {
   data.videos = shuffle(data.videos);
 
   data.videos.forEach(function (video) {
-    var videoLocalFile = data.path + "/" + video.objectId;
+    var videoLocalFile = data.path + '/' + video.objectId;
 
     // Write file name for ffmpeg later
-    fs.appendFile(data.path + "/" + videoListSuffix,
-      "file '" + videoLocalFile + "'", function (err) {
+    fs.appendFile(data.path + '/' + videoListSuffix,
+      'file "' + videoLocalFile + '"', function (err) {
         if (err) {
           throw err;
         }
@@ -143,7 +80,6 @@ function downloadVideos(data, callback) {
 
       // Callback after the last download
       downloaded.push(video.objectId);
-      console.log(downloaded.length, data.videos.length);
       if (downloaded.length === data.videos.length) {
         callback();
       }
@@ -156,12 +92,12 @@ function downloadVideos(data, callback) {
  * Mash videos together
  */
 function mashUpVideos(data, callback) {
-  var prog = "ffmpeg";
+  var prog = 'ffmpeg';
   var args = [
-    "-f", "concat",
-    "-i", data.path + "/" + videoListSuffix,
-    "-c", "copy",
-    data.path + "/" + mashUpSuffix
+    '-f', 'concat',
+    '-i', data.path + '/' + videoListSuffix,
+    '-c', 'copy',
+    data.path + '/' + mashUpSuffix
   ];
   spawn(prog, args, { stdio: 'ignore' })
     .on('close', function (code) {
@@ -178,7 +114,7 @@ function mashUpVideos(data, callback) {
 function uploadMashUp(data) {
 
   // Upload mashup to Parse.com
-  kaiseki.uploadFile(data.path + "/" + mashUpSuffix,
+  kaiseki.uploadFile(data.path + '/' + mashUpSuffix,
     function(err, res, body, success) {
 
       // Give mashup url to Parse.com
@@ -190,7 +126,7 @@ function uploadMashUp(data) {
         }
       };
       console.log(mashUp);
-      kaiseki.createObject("Mashup", mashUp,
+      kaiseki.createObject('Mashup', mashUp,
         function(err, res, body, success) {
           console.log('create file', arguments);
           if (err) {
