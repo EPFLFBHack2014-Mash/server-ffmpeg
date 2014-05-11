@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 var http = require("http");
 var tmp = require("tmp");
 var fs = require("fs");
@@ -23,11 +25,12 @@ http.createServer(function (request, response) {
   // Request received
   if (request.method === "POST") {
     response.writeHead(200, "OK", contentType);
+    response.end('Ok', 'utf8');
   }
   else {
     response.writeHead(405, "Method not allowed", contentType);
+    response.end('Method not allowed', 'utf8');
   }
-  response.end();
 
   // Create unique temp dir for this request
   tmp.dir(function (err, path) {
